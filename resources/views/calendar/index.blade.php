@@ -25,9 +25,9 @@
         <div class="col-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>Unscheduled Matches</h3>
-                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                {{-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
                     + Add
-                </button>
+                </button> --}}
             </div>
             <div id="external-events">
                 <div class="unscheduled-header">Drag matches to schedule them</div>

@@ -178,7 +178,6 @@ $(document).ready(function() {
         const duration = parseDuration(event.extendedProps.duration);
         const eventHtml = `
             <div class="external-event" data-event-id="${event.id}" data-event='${JSON.stringify(event)}'>
-                <button class="delete-event" onclick="deleteEvent(${event.id})">×</button>
                 <div>${event.title}</div>
                 <div class="event-meta">Duration: ${duration}</div>
             </div>

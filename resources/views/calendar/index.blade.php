@@ -13,7 +13,10 @@
         <!-- Calendar Column -->
         <div class="col-9">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3>Tournament Schedule</h3>
+                <h3>Tournament Schedule</h3> 
+                <a href="{{ route('calendar.settings') }}" class="btn btn-sm btn-info">
+                    <i class="fas fa-cog"></i> Time Settings
+                </a>
             </div>
             <div id="calendar"></div>
         </div>

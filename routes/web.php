@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\SettingController;
 
 
 // Calendar views
@@ -18,4 +19,9 @@ Route::prefix('api/calendar')->group(function () {
     Route::put('/events/{event}', [CalendarController::class, 'updateEvent'])->name('calendar.update');
     Route::post('/events/{event}/unschedule', [CalendarController::class, 'unscheduleEvent'])->name('calendar.unschedule');
     Route::delete('/events/{event}', [CalendarController::class, 'deleteEvent'])->name('calendar.delete');
+
+    Route::get('/settings', [SettingController::class, 'getSettings'])->name('calendar.settings.get');
+    Route::put('/settings', [SettingController::class, 'updateSettings'])->name('calendar.settings.update');
 });
+
+Route::get('/calendar/settings', [SettingController::class, 'settingsPage'])->name('calendar.settings');

@@ -9,6 +9,18 @@ $(document).ready(function() {
     
     let calendar;
     let currentEvent = null;
+
+
+    let calendarSettings = {};
+
+    // Load settings first
+    $.ajax({
+        url: '{{ route("calendar.settings.get") }}',
+        async: false, // Wait for settings before initializing calendar
+        success: function(settings) {
+            calendarSettings = settings;
+        }
+    });
     
     // Initialize calendar
     initializeCalendar();
@@ -34,6 +46,13 @@ $(document).ready(function() {
             nowIndicator: true,
             dayMaxEvents: true,
             height: 700,
+
+            slotDuration: calendarSettings.slotDuration,
+            slotLabelInterval: calendarSettings.slotLabelInterval,
+            snapDuration: calendarSettings.snapDuration,
+            slotMinTime: calendarSettings.slotMinTime,
+            slotMaxTime: calendarSettings.slotMaxTime,
+            slotLabelFormat: calendarSettings.slotLabelFormat,
             
             // Load resources from API
             resources: function(fetchInfo, successCallback, failureCallback) {

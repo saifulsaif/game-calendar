@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CalendarSetting;
+use App\Models\Resource;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -63,7 +64,85 @@ class SettingController extends Controller
     public function settingsPage()
     {
         $settings = CalendarSetting::all()->keyBy('key');
-        return view('calendar.settings', compact('settings'));
+        $resources = Resource::orderBy('order_index')->get();
+        return view('calendar.settings', compact('settings', 'resources'));
+    }
+
+    public function updateResource(Request $request, Resource $resource)
+    {
+        $validated = $request->validate([
+            'is_active' => 'nullable'
+        ]);
+
+        $status = ($validated['is_active'] == 'true') ? 1 : 0;
+
+        $resource->update(['is_active' => $status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Resource updated successfully',
+            'resource' => $resource
+        ]);
+    }
+
+    public function updateResourceOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'resources' => 'required|array',
+            'resources.*.id' => 'required|exists:resources,id',
+            'resources.*.order_index' => 'required|integer|min:0'
+        ]);
+
+        foreach ($validated['resources'] as $resourceData) {
+            Resource::where('id', $resourceData['id'])
+                ->update(['order_index' => $resourceData['order_index']]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Resource order updated successfully'
+        ]);
+    }
+
+    public function createResource(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'event_color' => 'required|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/'
+        ]);
+
+        $maxOrder = Resource::max('order_index') ?? 0;
+
+        $resource = Resource::create([
+            'title' => $validated['title'],
+            'event_color' => $validated['event_color'],
+            'order_index' => $maxOrder + 1,
+            'is_active' => true
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Resource created successfully',
+            'resource' => $resource
+        ]);
+    }
+
+    public function deleteResource(Resource $resource)
+    {
+        // Check if resource has events
+        if ($resource->events()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete resource with existing events'
+            ], 400);
+        }
+
+        $resource->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Resource deleted successfully'
+        ]);
     }
 
 }

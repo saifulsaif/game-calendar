@@ -206,7 +206,7 @@ $(document).ready(function() {
         
         $.ajax({
             url: `/api/calendar/events/${event.id}`,
-            method: 'PUT',
+            method: 'POST',
             data: {
                 start: event.start.toISOString(),
                 end: event.end.toISOString(),
@@ -332,76 +332,76 @@ $(document).ready(function() {
     }
     
     function showToast(message, type = 'success') {
-    // Create toast container if it doesn't exist
-    let toastContainer = $('.toast-container');
-    if (toastContainer.length === 0) {
-        toastContainer = $(`
-            <div class="toast-container position-fixed p-3" 
-                 style="z-index: 9999; bottom: 0; right: 0;">
+        // Create toast container if it doesn't exist
+        let toastContainer = $('.toast-container');
+        if (toastContainer.length === 0) {
+            toastContainer = $(`
+                <div class="toast-container position-fixed p-3" 
+                    style="z-index: 9999; bottom: 0; right: 0;">
+                </div>
+            `);
+            $('body').append(toastContainer);
+        }
+
+        // Determine styling based on type
+        const typeStyles = {
+            success: {
+                icon: 'check-circle-fill',
+                bgClass: 'bg-success',
+                textClass: 'text-white',
+                borderClass: 'border-success'
+            },
+            error: {
+                icon: 'exclamation-triangle-fill',
+                bgClass: 'bg-danger',
+                textClass: 'text-white',
+                borderClass: 'border-danger'
+            },
+            warning: {
+                icon: 'exclamation-triangle-fill',
+                bgClass: 'bg-warning',
+                textClass: 'text-dark',
+                borderClass: 'border-warning'
+            },
+            info: {
+                icon: 'info-fill',
+                bgClass: 'bg-info',
+                textClass: 'text-white',
+                borderClass: 'border-info'
+            }
+        };
+        const style = typeStyles[type] || typeStyles.success;
+
+        // Create toast element
+        const toast = $(`
+            <div class="toast show align-items-center ${style.bgClass} ${style.textClass} ${style.borderClass}" 
+                role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body d-flex align-items-center">
+                        <i class="bi bi-${style.icon} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
         `);
-        $('body').append(toastContainer);
-    }
 
-    // Determine styling based on type
-    const typeStyles = {
-        success: {
-            icon: 'check-circle-fill',
-            bgClass: 'bg-success',
-            textClass: 'text-white',
-            borderClass: 'border-success'
-        },
-        error: {
-            icon: 'exclamation-triangle-fill',
-            bgClass: 'bg-danger',
-            textClass: 'text-white',
-            borderClass: 'border-danger'
-        },
-        warning: {
-            icon: 'exclamation-triangle-fill',
-            bgClass: 'bg-warning',
-            textClass: 'text-dark',
-            borderClass: 'border-warning'
-        },
-        info: {
-            icon: 'info-fill',
-            bgClass: 'bg-info',
-            textClass: 'text-white',
-            borderClass: 'border-info'
-        }
-    };
-    const style = typeStyles[type] || typeStyles.success;
+        // Add to container
+        toastContainer.append(toast);
 
-    // Create toast element
-    const toast = $(`
-        <div class="toast show align-items-center ${style.bgClass} ${style.textClass} ${style.borderClass}" 
-             role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center">
-                    <i class="bi bi-${style.icon} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    `);
-
-    // Add to container
-    toastContainer.append(toast);
-
-    // Auto-remove after delay
-    setTimeout(() => {
-        toast.removeClass('show');
-        toast.addClass('hide');
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
-
-        // Allow manual dismissal
-        toast.find('.btn-close').on('click', () => {
+        // Auto-remove after delay
+        setTimeout(() => {
             toast.removeClass('show');
             toast.addClass('hide');
-            setTimeout(() => toast.remove(), 300);
-        });
-    }
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+
+            // Allow manual dismissal
+            toast.find('.btn-close').on('click', () => {
+                toast.removeClass('show');
+                toast.addClass('hide');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
 });
 </script>

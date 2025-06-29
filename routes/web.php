@@ -22,6 +22,10 @@ Route::prefix('api/calendar')->group(function () {
 
     Route::get('/settings', [SettingController::class, 'getSettings'])->name('calendar.settings.get');
     Route::put('/settings', [SettingController::class, 'updateSettings'])->name('calendar.settings.update');
+    Route::put('/resources/{resource}', [SettingController::class, 'updateResource'])->name('calendar.resources.update');
+    Route::post('/resources', [SettingController::class, 'createResource'])->name('calendar.resources.create');
+    Route::delete('/resources/{resource}', [SettingController::class, 'deleteResource'])->name('calendar.resources.delete');
+    Route::put('/resources-order', [SettingController::class, 'updateResourceOrder'])->name('calendar.resources.order');
 });
 
 Route::get('/calendar/settings', [SettingController::class, 'settingsPage'])->name('calendar.settings');

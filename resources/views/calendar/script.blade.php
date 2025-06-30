@@ -52,9 +52,17 @@ $(document).ready(function() {
             snapDuration: calendarSettings.snapDuration,
             slotMinTime: calendarSettings.slotMinTime,
             slotMaxTime: calendarSettings.slotMaxTime,
-            slotLabelFormat: calendarSettings.slotLabelFormat,
+             slotLabelFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // Use 24-hour format
+                },
+                eventTimeFormat: { // 24-hour format for events
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            },
             
-            // Load resources from API
             resources: function(fetchInfo, successCallback, failureCallback) {
                 $.ajax({
                     url: '{{ route("calendar.resources") }}',
@@ -66,7 +74,6 @@ $(document).ready(function() {
                     }
                 });
             },
-            
             // Load events from API
             events: function(fetchInfo, successCallback, failureCallback) {
                 $.ajax({
@@ -177,8 +184,9 @@ $(document).ready(function() {
     function addUnscheduledEventToList(event) {
         const duration = parseDuration(event.extendedProps.duration);
         const eventHtml = `
-            <div class="external-event" data-event-id="${event.id}" data-event='${JSON.stringify(event)}'>
+            <div class="external-event" style="background-color:${event.backgroundColor}" data-event-id="${event.id}" data-event='${JSON.stringify(event)}'>
                 <div>${event.title}</div>
+                <div>${event.extendedProps.level_name}</div>
                 <div class="event-meta">Duration: ${duration}</div>
             </div>
         `;
@@ -273,6 +281,8 @@ $(document).ready(function() {
                 <dd>${event.extendedProps.field || 'Not specified'}</dd>
                 <dt>Referee:</dt>
                 <dd>${event.extendedProps.referee || 'Not assigned'}</dd>
+                <dt>Level:</dt>
+                <dd>${event.extendedProps.level_name || 'Not assigned'}</dd>
                 <dt>Notes:</dt>
                 <dd>${event.extendedProps.notes || 'No additional notes'}</dd>
             </dl>
@@ -330,6 +340,32 @@ $(document).ready(function() {
         
         return `${hours}h ${minutes}m`;
     }
+
+    $('#levelFilter').change(function() {
+        const selectedLevel = $(this).val();
+        
+        if (selectedLevel) {
+            // Hide all events first
+            $('.external-event').hide();
+            
+            // Show only events with selected level
+            $('.external-event').each(function() {
+                const eventData = JSON.parse($(this).attr('data-event'));
+                if (eventData.extendedProps && eventData.extendedProps.level_id == selectedLevel) {
+                    $(this).show();
+                }
+            });
+        } else {
+            // Show all events
+            $('.external-event').show();
+        }
+        
+        // Update count
+        const visibleCount = $('.external-event:visible').length;
+        $('#unscheduled-count').text(`(${visibleCount} matches)`);
+    });
+
+
     
     function showToast(message, type = 'success') {
         // Create toast container if it doesn't exist

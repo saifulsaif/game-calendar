@@ -30,6 +30,18 @@
                 </button> --}}
             </div>
             <div id="external-events">
+                <div class="mb-3">
+                    <label>Filter by Level:</label>
+                    <select id="levelFilter" class="form-control">
+                        <option value="">All Levels</option>
+                        @foreach($levels as $level)
+                            <option value="{{ $level->id }}" data-color="{{ $level->color }}">
+                                {{ $level->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="unscheduled-header">Drag matches to schedule them</div>
                 <div id="unscheduled-list">
                     <!-- Unscheduled events will be loaded here -->
@@ -59,6 +71,9 @@
 </div>
 
 <!-- Add Event Modal -->
+{{-- resources/views/calendar/index.blade.php - Update the Add Event Modal --}}
+
+<!-- Update the Add Event Modal -->
 <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -71,6 +86,17 @@
                     <div class="mb-3">
                         <label for="eventTitle" class="form-label">Match Title</label>
                         <input type="text" class="form-control" id="eventTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="eventLevel" class="form-label">Priority Level</label>
+                        <select class="form-control" id="eventLevel" required>
+                            <option value="">Select Level</option>
+                            @foreach($levels as $level)
+                                <option value="{{ $level->id }}" data-color="{{ $level->color }}">
+                                    {{ $level->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="eventField" class="form-label">Field</label>

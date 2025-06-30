@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CalendarSetting;
+use App\Models\Level;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 
@@ -65,7 +66,8 @@ class SettingController extends Controller
     {
         $settings = CalendarSetting::all()->keyBy('key');
         $resources = Resource::orderBy('order_index')->get();
-        return view('calendar.settings', compact('settings', 'resources'));
+        $levels = Level::orderBy('order_index')->get();
+        return view('calendar.settings', compact('settings', 'resources', 'levels'));
     }
 
     public function updateResource(Request $request, Resource $resource)

@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Resource;
 use Illuminate\Http\Request;
+use App\Models\Level;
 use Carbon\Carbon;
 
 class CalendarController extends Controller
 {
     public function index()
     {
-        return view('calendar.index');
+        $levels = Level::active()->orderBy('order_index')->get();
+        return view('calendar.index', compact('levels'));
     }
 
     public function getEvents(Request $request)
@@ -21,7 +23,7 @@ class CalendarController extends Controller
         
         $events = Event::scheduled()
             ->whereBetween('start', [$start, $end])
-            ->with('resource')
+            ->with(['resource', 'level'])
             ->get()
             ->map(function ($event) {
                 return $event->toFullCalendarEvent();
@@ -33,17 +35,21 @@ class CalendarController extends Controller
     public function getUnscheduledEvents()
     {
         $events = Event::unscheduled()
+            ->with('level')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($event) {
                 return [
                     'id' => $event->id,
                     'title' => $event->title,
+                'backgroundColor' => $event->backgroundColor,
                     'extendedProps' => [
                         'field' => $event->field,
                         'referee' => $event->referee,
                         'notes' => $event->notes,
-                        'duration' => $event->duration
+                    'duration' => $event->duration,
+                    'level_id' => $event->level_id,
+                    'level_name' => $event->level?->name
                     ]
                 ];
             });
@@ -167,6 +173,86 @@ class CalendarController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Event deleted successfully'
+        ]);
+    }
+
+
+
+    // Level Management Methods
+
+    public function updateLevel(Request $request, Level $level)
+    {
+        $validated = $request->validate([
+            'is_active' => 'required'
+        ]);
+
+        $status = ($validated['is_active'] == 'true') ? 1 : 0;
+
+        $level->update(['is_active' => $status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Level updated successfully',
+            'level' => $level
+        ]);
+    }
+
+    public function updateLevelOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'levels' => 'required|array',
+            'levels.*.id' => 'required|exists:levels,id',
+            'levels.*.order_index' => 'required|integer|min:0'
+        ]);
+
+        foreach ($validated['levels'] as $levelData) {
+            Level::where('id', $levelData['id'])
+                ->update(['order_index' => $levelData['order_index']]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Level order updated successfully'
+        ]);
+    }
+
+    public function createLevel(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'color' => 'required|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/'
+        ]);
+
+        $maxOrder = Level::max('order_index') ?? 0;
+
+        $level = Level::create([
+            'name' => $validated['name'],
+            'color' => $validated['color'],
+            'order_index' => $maxOrder + 1,
+            'is_active' => 1
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Level created successfully',
+            'level' => $level
+        ]);
+    }
+
+    public function deleteLevel(Level $level)
+    {
+        if ($level->events()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete level with existing events'
+            ], 400);
+        }
+
+        $level->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Level deleted successfully'
         ]);
     }
 }

@@ -94,8 +94,9 @@ $(document).ready(function() {
             // Handle external event drop
             eventReceive: function(info) {
                 const eventId = info.draggedEl.getAttribute('data-event-id');
+                const eventData = JSON.parse(info.draggedEl.getAttribute('data-event'));
                 
-                // Remove the event from calendar to prevent duplicates
+                // Remove the temporary event
                 info.event.remove();
                 
                 $.ajax({
@@ -111,15 +112,10 @@ $(document).ready(function() {
                         // Remove from unscheduled list
                         info.draggedEl.remove();
                         
-                        // Add the event back with proper data from server
-                        console.log('inserting event');
+                        // Add the event with server data INCLUDING original backgroundColor
+                        calendar.addEvent(response.event);
                         
-                        const existingEvent = calendar.getEventById(response.event.id);
-                        if (!existingEvent) {
-                            // Event doesn't exist, add it
-                            calendar.addEvent(response.event);
-                            showToast('Game scheduled successfully');
-                        }
+                        showToast('Event scheduled successfully');
                     },
                     error: function() {
                         // If error, reload events to ensure consistency
@@ -129,7 +125,33 @@ $(document).ready(function() {
                     }
                 });
             },
-            
+
+            eventContent: function(arg) {
+                const levelName = arg.event.extendedProps.level_name;
+                const originalTitle = arg.event.extendedProps.original_title || arg.event.title;
+                const timeText = arg.timeText; // This will show the time range
+                
+                return {
+                    html: `
+                        <div class="fc-event-main-frame">
+                            <div class="fc-event-time" style="font-size: 0.75em; margin-bottom: 2px;">
+                                ${timeText}
+                            </div>
+                            <div class="fc-event-title-wrap">
+                                <div class="fc-event-title fc-sticky">
+                                    ${originalTitle}
+                                </div>
+                            </div>
+                             ${levelName ? `
+                            <div class="fc-event-level-tag" style="font-size: 0.75em; font-weight: bold;">
+                                ${levelName}
+                            </div>
+                            ` : ''}
+                        </div>
+                    `
+                };
+            },
+                        
             // Handle event click
             eventClick: function(info) {
                 currentEvent = info.event;
@@ -198,10 +220,12 @@ $(document).ready(function() {
         new FullCalendar.Draggable(containerEl, {
             itemSelector: '.external-event',
             eventData: function(eventEl) {
-                const eventData = JSON.parse(eventEl.getAttribute('data-event'));
+                const eventData = JSON.parse(eventEl.getAttribute('data-event'));                
                 return {
                     id: eventData.id,
                     title: eventData.title,
+                    backgroundColor: eventData.backgroundColor,
+                    borderColor: eventData.backgroundColor,
                     duration: eventData.extendedProps.duration || '01:30',
                     extendedProps: eventData.extendedProps || {}
                 };

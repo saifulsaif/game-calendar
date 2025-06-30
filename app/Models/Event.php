@@ -63,22 +63,39 @@ class Event extends Model
 
     public function toFullCalendarEvent()
     {
+        // Include level name in the title
+        $displayTitle = $this->title;
+        if ($this->level) {
+            $displayTitle = '[' . $this->level->name . '] ' . $this->title;
+        }
+
         return [
             'id' => (string) $this->id,
-            'title' => $this->title,
+            'title' => $displayTitle, // Updated title with level name
             'start' => $this->start?->toIso8601String(),
             'end' => $this->end?->toIso8601String(),
             'resourceId' => $this->resourceId ? (string) $this->resourceId : null,
-            'backgroundColor' => $this->backgroundColor, // Use level color
+            'backgroundColor' => $this->backgroundColor,
             'borderColor' => $this->backgroundColor,
+            'textColor' => $this->getContrastColor($this->backgroundColor), // Add text color for readability
             'extendedProps' => [
                 'field' => $this->field,
                 'referee' => $this->referee,
                 'notes' => $this->notes,
                 'duration' => $this->duration,
                 'level_id' => $this->level_id,
-                'level_name' => $this->level?->name
+                'level_name' => $this->level?->name,
+                'original_title' => $this->title // Store original title without level
             ]
         ];
+    }
+
+    private function getContrastColor($hexColor)
+    {
+        $r = hexdec(substr($hexColor, 1, 2));
+        $g = hexdec(substr($hexColor, 3, 2));
+        $b = hexdec(substr($hexColor, 5, 2));
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        return $luminance > 0.5 ? '#000000' : '#ffffff';
     }
 }

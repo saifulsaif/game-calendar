@@ -24,7 +24,7 @@
         <!-- Unscheduled Events Column -->
         <div class="col-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3>Unscheduled Matches</h3>
+                <h5>Unscheduled Matches</h5>
                 {{-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
                     + Add
                 </button> --}}

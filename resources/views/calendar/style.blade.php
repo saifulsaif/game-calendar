@@ -252,5 +252,33 @@
     .fc-scroller::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
-    
+    .fc-event-level-tag {
+        opacity: 0.8;
+        margin-bottom: 2px;
+    }
+
+    .fc-event-main-frame {
+        padding: 2px 4px;
+    }
+
+    .fc-timeline-event .fc-event-main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Make level filter sticky */
+    #levelFilter {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: white;
+        margin-bottom: 10px;
+    }
+
+    /* Unscheduled count */
+    #unscheduled-count {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-left: 10px;
+    }
 </style>
